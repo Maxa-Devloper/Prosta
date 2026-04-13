@@ -1,0 +1,40 @@
+name: Build JNI
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install 7zip
+        run: sudo apt-get install -y p7zip-full
+
+      - name: Extract archive
+        run: |
+          7z x jni.zip
+          mv "@Lildrugbio & @vizirsstudio01 & @vizirsstudio" source
+
+      - name: Clean old build artifacts
+        run: |
+          rm -rf source/obj/
+          rm -rf source/libs/
+
+      - name: Setup NDK
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r25c
+
+      - name: Build
+        run: |
+          ndk-build \
+            NDK_PROJECT_PATH=source \
+            APP_BUILD_SCRIPT=source/jni/Android.mk \
+            NDK_APPLICATION_MK=source/jni/Application.mk
+
+      - name: Upload .so
+        uses: actions/upload-artifact@v4
+        with:
+          name: libplugin
+          path: source/libs/
